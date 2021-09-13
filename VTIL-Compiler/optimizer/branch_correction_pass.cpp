@@ -75,7 +75,7 @@ namespace vtil::optimizer
 				vip_t target = ( *it )->entry_vip;
 				bool plausible = false;
 				for ( auto& branch : branch_info.destinations )
-					plausible |= ( branch == target ).get<bool>().value_or( true );
+					plausible |= ( branch == (size_t)target ).get<bool>().value_or( true );
 
 				// If it is not:
 				//
