@@ -232,7 +232,7 @@ namespace vtil::symbolic
 
 		// Construct from constants.
 		//
-		template<Integral T = uintptr_t>
+		template<Integral T = arch::uint_t>
 		expression( T value, bitcnt_t bit_count = sizeof( T ) * 8 ) : operable( value, bit_count ), simplify_hint( true ) { update( false ); }
 
 		// Constructor for symbolic variables.
@@ -453,7 +453,7 @@ namespace vtil::symbolic
 		static constexpr auto default_eval = [ ] ( const unique_identifier& v ) { return std::nullopt; };
 		template<typename type>
 		std::optional<type> get() const { return evaluate( default_eval ).get<type>(); }
-		template<bool as_signed = false, typename type = std::conditional_t<as_signed, intptr_t, uintptr_t>>
+		template<bool as_signed = false, typename type = std::conditional_t<as_signed, arch::int_t, arch::uint_t>>
 		std::optional<type> get() const { return evaluate( default_eval ).get<type>(); }
 
 		// Enumerates the whole tree.

@@ -57,14 +57,13 @@ namespace vtil
 		
 		// Size of the shadow space.
 		//
-		size_t shadow_space = 0;
+		arch::uint_t shadow_space = 0;
 		
 		// Purges any writes to stack that will be end up below the final stack pointer.
 		//
 		bool purge_stack = false;
 	};
 
-#if _M_X64 || __x86_64__
 	namespace amd64
 	{
 		// Define a convention preserving all changes.
@@ -144,7 +143,6 @@ namespace vtil
 		};
 	}
 
-#elif _M_IX86 || __i386__
 	namespace x86
     {
 		// Define a convention preserving all changes.
@@ -209,7 +207,6 @@ namespace vtil
 		};
 	}
 
-#elif _M_ARM64 || __aarch64__
 
 	namespace arm64
 	{
@@ -453,5 +450,4 @@ namespace vtil
 		};
 	}
 
-#endif
 };

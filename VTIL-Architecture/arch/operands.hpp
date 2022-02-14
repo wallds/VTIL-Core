@@ -52,8 +52,8 @@ namespace vtil
 			//
 			union
 			{
-				intptr_t ival;
-				uintptr_t uval;
+				arch::int_t ival;
+				arch::uint_t uval;
 #if _M_X64 || __x86_64__
 				int64_t i64;
 				uint64_t u64;
@@ -67,7 +67,7 @@ namespace vtil
 			// Replicate default constructor, skipping the reducable base.
 			//
 			constexpr immediate_t() : uval( 0 ), bit_count( 0 ) {}
-			constexpr immediate_t(uintptr_t uval, bitcnt_t bit_count )
+			constexpr immediate_t(arch::uint_t uval, bitcnt_t bit_count )
 				: uval( uval ), bit_count( bit_count ) {}
 
 			// Declare reduction.
@@ -97,7 +97,7 @@ namespace vtil
 		//
 		template<Integral T>
 		constexpr operand( T value, bitcnt_t bit_count = sizeof( T ) * 8 ) 
-			: descriptor( immediate_t{ ( uintptr_t ) math::imm_extend( value ), bit_count } ) {}
+			: descriptor( immediate_t{ (arch::uint_t) math::imm_extend( value ), bit_count } ) {}
 
 		// Wrappers around std::get.
 		//

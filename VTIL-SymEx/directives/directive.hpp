@@ -220,8 +220,8 @@ namespace vtil::symbolic::directive
 
         // Variable constructor.
         //
-        template<Integral T = uintptr_t>
-        instance( T v, bitcnt_t _discarded_bit_count = 0 ) : operable( ( intptr_t ) v , vtil::arch::bit_count ), num_nodes( 1 )
+        template<Integral T = arch::uint_t>
+        instance( T v, bitcnt_t _discarded_bit_count = 0 ) : operable( ( arch::int_t ) v , vtil::arch::bit_count ), num_nodes( 1 )
         {
             for ( auto [out, idx] : zip( signatures, iindices ) )
                 out = { make_copy( value ).resize( math::narrow_cast<bitcnt_t>( idx + 1 ) ) };
@@ -321,7 +321,7 @@ namespace vtil::symbolic::directive
     static instance operator!( const instance& a ) { return { tagged<directive_op_desc::simplify>, a }; }
     static instance __iff( const instance& a, const instance& b ) { return { a, tagged<directive_op_desc::iff>, b }; }
     static instance __or( const instance& a, const instance& b ) { return { a, tagged<directive_op_desc::or_also>, b }; }
-    static instance __unreachable() { return { (uintptr_t) 0, tagged<directive_op_desc::unreachable>, 0ull }; }
+    static instance __unreachable() { return { (arch::uint_t) 0, tagged<directive_op_desc::unreachable>, 0ull }; }
     static instance __mask_unk( const instance& a ) { return { tagged<directive_op_desc::mask_unknown>, a }; }
     static instance __mask_knw1( const instance& a ) { return { tagged<directive_op_desc::mask_one>, a }; }
     static instance __mask_knw0( const instance& a ) { return { tagged<directive_op_desc::mask_zero>, a }; }

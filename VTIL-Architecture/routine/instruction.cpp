@@ -78,7 +78,7 @@ namespace vtil
 
 	// Returns the memory location this instruction references.
 	//
-	std::pair<register_desc&, intptr_t&> instruction::memory_location()
+	std::pair<register_desc&, arch::int_t&> instruction::memory_location()
 	{
 		// Assert that instruction does access memory.
 		//
@@ -91,7 +91,7 @@ namespace vtil
 			operands[ base->memory_operand_index + 1 ].imm().ival
 		};
 	}
-	std::pair<const register_desc&, const intptr_t&> instruction::memory_location() const
+	std::pair<const register_desc&, const arch::int_t&> instruction::memory_location() const
 	{
 		// Assert that instruction does access memory.
 		//

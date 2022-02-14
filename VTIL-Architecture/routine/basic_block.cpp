@@ -66,7 +66,7 @@ namespace vtil
 
 	// Queues a stack shift.
 	//
-	basic_block* basic_block::shift_sp( intptr_t offset, bool merge_instance, const const_iterator& it_const )
+	basic_block* basic_block::shift_sp( arch::int_t offset, bool merge_instance, const const_iterator& it_const )
 	{
 		// Drop const qualifier of the iterator, since we are in a non-const 
 		// qualified member function, this qualifier is unnecessary.
@@ -131,6 +131,7 @@ namespace vtil
 		switch ( owner->arch_id )
 		{
 			case architecture_amd64: bytes = amd64::assemble( assembly ); break;
+			case architecture_x86: bytes = x86::assemble( assembly ); break;
 			case architecture_arm64: bytes = arm64::assemble( assembly ); break;
 			default: unreachable();
 		}
@@ -161,14 +162,14 @@ namespace vtil
 		{
 			// Adjust for misalignment and zero the padding.
 			//
-			intptr_t padding_size = VTIL_ARCH_POPPUSH_ENFORCED_STACK_ALIGN - misalignment;
+			arch::int_t padding_size = VTIL_ARCH_POPPUSH_ENFORCED_STACK_ALIGN - misalignment;
 			shift_sp( -padding_size );
 			str( REG_SP, sp_offset, operand( 0, math::narrow_cast<bitcnt_t>( padding_size * 8 ) ) );
 		}
 
 		// Shift and write the operand.
 		//
-		shift_sp( -intptr_t( op.size() ) );
+		shift_sp( -arch::int_t( op.size() ) );
 		str( REG_SP, sp_offset, op );
 		return this;
 	}

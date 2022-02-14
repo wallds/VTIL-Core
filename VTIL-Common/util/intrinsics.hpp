@@ -54,7 +54,11 @@
 
 #ifdef _MSC_VER
     #include <intrin.h>
-    #define unreachable() __assume(0)
+    #if _DEBUG
+        #define unreachable() do { __debugbreak(); __assume(0); } while(0)
+    #else
+        #define unreachable() __assume(0)
+    #endif
     #define FUNCTION_NAME __FUNCSIG__
 #else
     #include <emmintrin.h>

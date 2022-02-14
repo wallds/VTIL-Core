@@ -75,7 +75,7 @@ namespace vtil::optimizer
 				vip_t target = ( *it )->entry_vip;
 				bool plausible = false;
 				for ( auto& branch : branch_info.destinations )
-					plausible |= ( branch == target ).get<bool>().value_or( true );
+					plausible |= ( branch == arch::uint_t(target) ).get<bool>().value_or( true );
 
 				// If it is not:
 				//
@@ -117,7 +117,7 @@ namespace vtil::optimizer
 				// If immediate return as is.
 				//
 				if ( exp->is_constant() )
-					return operand{ *exp->get<uintptr_t>(), exp->size() };
+					return operand{ *exp->get<arch::uint_t>(), exp->size() };
 
 				// If expression is not a register:
 				//

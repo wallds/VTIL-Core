@@ -165,7 +165,7 @@ namespace vtil
 				}
 				// If high bits are set, but the operation bit-count is equal to or less than 64 bits.
 				//
-				else if ( ( ins.operands[ 0 ].size() + ins.operands[ 1 ].size() ) <= 8 )
+				else if ( ( ins.operands[ 0 ].size() + ins.operands[ 1 ].size() ) <= vtil::arch::size )
 				{
 					auto op1_low = cvt_operand( 0 );
 					auto op1 = op1_low | ( op1_high.resize( op1_high->size() + op1_low->size() ) << op1_low->size() );

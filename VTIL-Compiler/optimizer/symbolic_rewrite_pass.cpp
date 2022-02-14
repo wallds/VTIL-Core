@@ -209,14 +209,14 @@ namespace vtil::optimizer
 					//
 					instruction_buffer.emplace_back(
 						&ins::str,
-						REG_SP, make_imm<intptr_t>( (intptr_t) *displacement ), translator << v
+						REG_SP, make_imm<arch::int_t>( (arch::int_t) *displacement ), translator << v
 					);
 				}
 				else
 				{
 					// Try to extract the offset from the compound expression.
 					//
-					intptr_t offset = 0;
+					arch::int_t offset = 0;
 					auto exp = symbolic::variable::pack_all( k.base ).simplify( true );
 					if ( !exp->is_constant() )
 					{
@@ -226,12 +226,12 @@ namespace vtil::optimizer
 						if ( fast_match( &results, A + U, exp ) )
 						{
 							exp = results.front().translate( A );
-							offset = *results.front().translate( U )->get<intptr_t>();
+							offset = *results.front().translate( U )->get<arch::int_t>();
 						}
 						else if ( fast_match( &results, A - U, exp ) )
 						{
 							exp = results.front().translate( A );
-							offset = -*results.front().translate( U )->get<intptr_t>();
+							offset = -*results.front().translate( U )->get<arch::int_t>();
 						}
 					}
 

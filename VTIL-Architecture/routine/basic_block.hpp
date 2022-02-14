@@ -259,7 +259,7 @@ namespace vtil
 		// or the beginning of the basic block and the index of the stack instance.
 		//
 		uint32_t sp_index = 0;
-		intptr_t sp_offset = 0;
+		arch::int_t sp_offset = 0;
 
 		// Last temporary index used.
 		//
@@ -376,7 +376,7 @@ namespace vtil
 
 		// Queues a stack shift.
 		//
-		basic_block* shift_sp( intptr_t offset, bool merge_instance = false, const const_iterator& it = {} );
+		basic_block* shift_sp( arch::int_t offset, bool merge_instance = false, const const_iterator& it = {} );
 
 		// Emits an entire instruction using series of VEMITs.
 		//

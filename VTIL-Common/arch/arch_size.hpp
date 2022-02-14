@@ -42,7 +42,9 @@ namespace vtil
 {
     namespace arch
     {
-        constexpr int size = sizeof(void*);
+        using uint_t = uint32_t;
+        using int_t = int32_t;
+        constexpr int size = sizeof(uint_t);
         constexpr int bit_count = size * 8;
     }
 }

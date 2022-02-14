@@ -65,7 +65,7 @@ namespace vtil
 		// [MOV SP, <>] if applicable, or the beginning of 
 		// the basic block and the index of the stack instance.
 		//
-		intptr_t sp_offset = 0;
+		arch::int_t sp_offset = 0;
 		uint32_t sp_index = 0;
 		bool sp_reset = false;
 
@@ -119,8 +119,8 @@ namespace vtil
 
 		// Returns the memory location this instruction references.
 		//
-		std::pair<register_desc&, intptr_t&> memory_location();
-		std::pair<const register_desc&, const intptr_t&> memory_location() const;
+		std::pair<register_desc&, arch::int_t&> memory_location();
+		std::pair<const register_desc&, const arch::int_t&> memory_location() const;
 
 		// Returns operands with their types zipped for enumeration.
 		//

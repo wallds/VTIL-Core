@@ -3,14 +3,16 @@
 #include <vtil/arch>
 #include <vtil/optimizer-tests>
 
+using namespace vtil;
+
 namespace registers
 {
-#if _M_X64 || __x86_64__
+#if 0
     constexpr auto ax = X86_REG_RAX;
     constexpr auto bx = X86_REG_RBX;
     constexpr auto cx = X86_REG_RCX;
     constexpr auto dx = X86_REG_RDX;
-#elif _M_IX86 || __i386__
+#else
     constexpr auto ax = X86_REG_EAX;
     constexpr auto bx = X86_REG_EBX;
     constexpr auto cx = X86_REG_ECX;
@@ -106,16 +108,16 @@ DOCTEST_TEST_CASE("Optimization stack_pinning_pass")
     auto block = vtil::basic_block::begin(0x1337);
 
     vtil::register_desc reg_ax(vtil::register_physical, registers::ax, vtil::arch::bit_count, 0);
-
-    block->mov(reg_ax, (uintptr_t)0);
+    auto xxx = register_desc( register_physical | register_stack_pointer, 0, arch::bit_count );
+    block->mov(reg_ax, arch::uint_t(0));
     block->sub(vtil::REG_SP, vtil::arch::size);
-    block->mov(reg_ax, (uintptr_t)0);
+    block->mov(reg_ax, arch::uint_t(0));
     block->push(reg_ax);
     block->pop(reg_ax);
     block->mov(reg_ax, vtil::arch::size);
     block->add(vtil::REG_SP, reg_ax);
 
-    block->vexit(0ull); // marks the end of a basic_block
+    block->vexit(arch::uint_t(0)); // marks the end of a basic_block
 
     vtil::logger::log(":: Before:\n");
     vtil::debug::dump(block->owner);
@@ -141,8 +143,8 @@ DOCTEST_TEST_CASE("Optimization istack_ref_substitution_pass")
     // sub eax, 4
     block->sub(reg_eax, vtil::arch::size);
     // mov [eax+0], 1
-    block->str(reg_eax, 0, (uintptr_t) 1);
-    block->vexit(0ull); // marks the end of a basic_block
+    block->str(reg_eax, 0, arch::uint_t(1));
+    block->vexit(arch::uint_t(0)); // marks the end of a basic_block
 
     vtil::logger::log(":: Before:\n");
     vtil::debug::dump(block->owner);
@@ -158,7 +160,7 @@ DOCTEST_TEST_CASE("Optimization istack_ref_substitution_pass")
     CHECK(ins.base == &vtil::ins::str);
     CHECK(ins.operands.size() == 3);
     CHECK(ins.operands[0].reg().to_string() == "$sp");
-    CHECK(ins.operands[1].imm().ival == -(intptr_t)(vtil::arch::size));
+    CHECK(ins.operands[1].imm().ival == -(arch::int_t)(vtil::arch::size));
     CHECK(ins.operands[2].imm().ival == 0x1);
 
 }
@@ -172,10 +174,10 @@ DOCTEST_TEST_CASE("Optimization stack_propagation_pass")
 
 
     // mov [esp+0], 0x1234
-    block->str(vtil::REG_SP, 0, (uintptr_t)0x1234);
+    block->str(vtil::REG_SP, 0, arch::uint_t(0x1234));
     // mov eax, [esp+0]
     block->ldd(reg_eax, vtil::REG_SP, 0);
-    block->vexit(0ull); // marks the end of a basic_block
+    block->vexit(arch::uint_t(0)); // marks the end of a basic_block
 
     vtil::logger::log(":: Before:\n");
     vtil::debug::dump(block->owner);
@@ -202,9 +204,9 @@ DOCTEST_TEST_CASE("Optimization dead_code_elimination_pass")
     vtil::register_desc reg_eax(vtil::register_physical, registers::ax, vtil::arch::bit_count, 0);
 
 
-    block->mov(reg_eax, (uintptr_t) 1);
-    block->mov(reg_eax, (uintptr_t) 2);
-    block->vexit(0ull); // marks the end of a basic_block
+    block->mov(reg_eax, arch::uint_t(1));
+    block->mov(reg_eax, arch::uint_t(2));
+    block->vexit(arch::uint_t(0)); // marks the end of a basic_block
 
     vtil::logger::log(":: Before:\n");
     vtil::debug::dump(block->owner);
@@ -226,10 +228,10 @@ DOCTEST_TEST_CASE("Optimization mov_propagation_pass")
     vtil::register_desc reg_ebx(vtil::register_physical, registers::bx, vtil::arch::bit_count, 0);
 
     // mov eax, 0x1
-    block->mov(reg_eax, (uintptr_t) 1);
+    block->mov(reg_eax, arch::uint_t(1));
     // mov ebx, eax
     block->mov(reg_ebx, reg_eax);
-    block->vexit(0ull); // marks the end of a basic_block
+    block->vexit(arch::uint_t(0)); // marks the end of a basic_block
 
     vtil::logger::log(":: Before:\n");
     vtil::debug::dump(block->owner);
@@ -258,14 +260,14 @@ DOCTEST_TEST_CASE("Optimization register_renaming_pass")
     vtil::register_desc reg_ebx(vtil::register_physical, registers::bx, vtil::arch::bit_count, 0);
 
     // mov eax, 1
-    block->mov(reg_eax, (uintptr_t) 1);
+    block->mov(reg_eax, arch::uint_t(1));
     // mov ebx, eax
     block->mov(reg_ebx, reg_eax);
     // mov [esp+0], ebx
     block->str(vtil::REG_SP, 0, reg_ebx);
-    block->mov(reg_eax, (uintptr_t) 1);
-    block->mov(reg_ebx, (uintptr_t) 1);
-    block->vexit(0ull); // marks the end of a basic_block
+    block->mov(reg_eax, arch::uint_t(1));
+    block->mov(reg_ebx, arch::uint_t(1));
+    block->vexit(arch::uint_t(0)); // marks the end of a basic_block
 
     vtil::logger::log(":: Before:\n");
     vtil::debug::dump(block->owner);
@@ -294,14 +296,14 @@ DOCTEST_TEST_CASE("Optimization symbolic_rewrite_pass<true>")
     vtil::register_desc reg_ebx(vtil::register_physical, registers::bx, vtil::arch::bit_count, 0);
 
     // mov eax, 1
-    block->mov(reg_eax, (uintptr_t) 1);
+    block->mov(reg_eax, arch::uint_t(1));
     // mov ebx, eax
     block->mov(reg_ebx, reg_eax);
     // mov[esp+0], ebx
     block->str(vtil::REG_SP, 0, reg_ebx);
-    block->mov(reg_eax, (uintptr_t) 1);
-    block->mov(reg_ebx, (uintptr_t) 1);
-    block->vexit(0ull); // marks the end of a basic_block
+    block->mov(reg_eax, arch::uint_t(1));
+    block->mov(reg_ebx, arch::uint_t(1));
+    block->vexit(arch::uint_t(0)); // marks the end of a basic_block
 
     vtil::logger::log(":: Before:\n");
     vtil::debug::dump(block->owner);
@@ -354,9 +356,9 @@ DOCTEST_TEST_CASE("Optimization dead_code_elimination_pass")
         // sp -= 0x10
         block->shift_sp( 0x10 );
         // mov eax, 0
-        block->mov( reg_eax, (uintptr_t)0 );
+        block->mov( reg_eax, arch::uint_t(0) );
         // vexit 0
-        block->vexit( 0ull ); // marks the end of a basic_block
+        block->vexit( arch::uint_t(0) ); // marks the end of a basic_block
 
         vtil::logger::log( ":: Before:\n" );
         vtil::debug::dump( block->owner );
@@ -384,7 +386,7 @@ DOCTEST_TEST_CASE("Optimization dead_code_elimination_pass")
             // push ebx
             block1->push( reg_ebx );
             // jmp 0x2000
-            block1->jmp( (uintptr_t) 0x2000 );
+            block1->jmp( arch::uint_t(0x2000) );
         }
 
         auto block2 = block1->fork( 0x2000 );
@@ -392,9 +394,9 @@ DOCTEST_TEST_CASE("Optimization dead_code_elimination_pass")
             // sp -= 0x10
             block2->shift_sp( 0x10 );
             // mov eax, 0
-            block2->mov( reg_eax, (uintptr_t)0 );
+            block2->mov( reg_eax, arch::uint_t(0) );
             // vexit 0
-            block2->vexit( 0ull ); // marks the end
+            block2->vexit( arch::uint_t(0) ); // marks the end
         }
 
         vtil::logger::log( ":: Before:\n" );
@@ -423,9 +425,9 @@ DOCTEST_TEST_CASE("Optimization dead_code_elimination_pass")
             // push ebx
             block1->push( reg_ebx ); // Not used, DCE me
             // ecx = ecx == 0xAABB
-            block1->te(  reg_ecx, reg_ecx, (uintptr_t)0xAABB );
+            block1->te(  reg_ecx, reg_ecx, arch::uint_t(0xAABB) );
             // js ecx ? 0x2000, 0x3000
-            block1->js( reg_ecx, (uintptr_t)0x2000, (uintptr_t)0x3000 );
+            block1->js( reg_ecx, arch::uint_t(0x2000), arch::uint_t(0x3000) );
         }
 
         auto block2 = block1->fork( 0x2000 );
@@ -433,9 +435,9 @@ DOCTEST_TEST_CASE("Optimization dead_code_elimination_pass")
             // sp += 0x10
             block2->shift_sp( vtil::arch::size*2 );
             // mov eax, 0
-            block2->add( reg_eax, (uintptr_t)1 );  // need this to contains [shift_sp]
+            block2->add( reg_eax, arch::uint_t(1) );  // need this to contains [shift_sp]
             // vexit 0
-            block2->vexit( 0ull ); // marks the end
+            block2->vexit( arch::uint_t(0) ); // marks the end
         }
 
         auto block3 = block1->fork( 0x3000 );
@@ -445,9 +447,9 @@ DOCTEST_TEST_CASE("Optimization dead_code_elimination_pass")
             // sp += 0x10
             block3->shift_sp( vtil::arch::size*2 );
             // add eax, 1
-            block3->add( reg_eax, (uintptr_t)1 ); // need this to contains [shift_sp]
+            block3->add( reg_eax, arch::uint_t(1) ); // need this to contains [shift_sp]
             // vexit 0
-            block3->vexit( 0ull ); // marks the end
+            block3->vexit( arch::uint_t(0) ); // marks the end
         }
 
 
@@ -485,7 +487,7 @@ DOCTEST_TEST_CASE("Optimization Simplification")
     }
 
     block->vpinr(eax);  // pin register eax as read so it doesn't get optimized away
-    block->vexit(0ull); // marks the end of a basic_block
+    block->vexit(arch::uint_t(0)); // marks the end of a basic_block
 
     vtil::logger::log(":: Before:\n");
     vtil::debug::dump(block->owner);
@@ -503,7 +505,7 @@ DOCTEST_TEST_CASE("Optimization Simplification")
     vtil::debug::dump(block->owner);
 
 
-    CHECK(block->sp_offset == -(intptr_t)(2 * vtil::arch::size));
+    CHECK(block->sp_offset == -(arch::int_t)(2 * vtil::arch::size));
     CHECK(block->size() == 5);
 
     auto ins = (*block)[0];
@@ -518,7 +520,7 @@ DOCTEST_TEST_CASE("Optimization Simplification")
     CHECK(ins.base == &vtil::ins::str);
     CHECK(ins.operands.size() == 3);
     CHECK(ins.operands[0].reg().to_string() == "$sp");
-    CHECK(ins.operands[1].imm().ival == -(intptr_t)(1 * vtil::arch::size));
+    CHECK(ins.operands[1].imm().ival == -(arch::int_t)(1 * vtil::arch::size));
     CHECK(ins.operands[2].imm().ival == 0x0);
 
     ins = (*block)[2];
@@ -526,7 +528,7 @@ DOCTEST_TEST_CASE("Optimization Simplification")
     CHECK(ins.base == &vtil::ins::str);
     CHECK(ins.operands.size() == 3);
     CHECK(ins.operands[0].reg().to_string() == "$sp");
-    CHECK(ins.operands[1].imm().ival == -(intptr_t)(2 * vtil::arch::size));
+    CHECK(ins.operands[1].imm().ival == -(arch::int_t)(2 * vtil::arch::size));
     CHECK(ins.operands[2].imm().ival == 0x1);
 
     ins = (*block)[3];
@@ -549,34 +551,34 @@ DOCTEST_TEST_CASE("Optimization bblock_thunk_removal_pass")
 
 	//Check reduction
 	{	
-		auto block1 = vtil::basic_block::begin((uintptr_t)0x1000);
+		auto block1 = vtil::basic_block::begin(arch::uint_t(0x1000));
 		auto rtn = block1->owner;
 		{
 			// 0x1000: js eflags@11:1 0x2000, 0x3000
-			block1->js(vtil::REG_FLAGS.select(1, 11), (uintptr_t)0x2000, (uintptr_t)0x3000);
+			block1->js(vtil::REG_FLAGS.select(1, 11), arch::uint_t(0x2000), arch::uint_t(0x3000));
 		}
-		auto block2 = block1->fork((uintptr_t)0x2000);
+		auto block2 = block1->fork(arch::uint_t(0x2000));
 		{
 			// 0x2000: jmp 0x4000
-			block2->jmp((uintptr_t)0x4000);
-			block2->fork((uintptr_t)0x4000);
+			block2->jmp(arch::uint_t(0x4000));
+			block2->fork(arch::uint_t(0x4000));
 		}
-		auto block3 = block1->fork((uintptr_t)0x3000);
+		auto block3 = block1->fork(arch::uint_t(0x3000));
 		{
 			// 0x3000: jmp 0x4000
-			block3->jmp((uintptr_t)0x4000);
-			block3->fork((uintptr_t)0x4000);
+			block3->jmp(arch::uint_t(0x4000));
+			block3->fork(arch::uint_t(0x4000));
 		}
-		auto block4 = rtn->get_block((uintptr_t)0x4000);
+		auto block4 = rtn->get_block(arch::uint_t(0x4000));
 		{
 			// 0x4000: jmp 0x5000
-			block4->jmp((uintptr_t)0x5000);
-			block4->fork((uintptr_t)0x5000);
+			block4->jmp(arch::uint_t(0x5000));
+			block4->fork(arch::uint_t(0x5000));
 		}
-		auto block5 = rtn->get_block((uintptr_t)0x5000);
+		auto block5 = rtn->get_block(arch::uint_t(0x5000));
 		{
 			// 0x5000: vexit 0
-			block5->vexit((uintptr_t)0);
+			block5->vexit(arch::uint_t(0));
 		}
 		vtil::logger::log("Before:\n");
 		vtil::debug::dump(rtn);
@@ -597,23 +599,23 @@ DOCTEST_TEST_CASE("Optimization bblock_thunk_removal_pass")
 
 		auto block1 = vtil::basic_block::begin(0x1000);
 		{			
-			block1->push((uintptr_t)0x12345678);			
-			block1->js(registers::cx, 0x2000ull, 0x3000ull);
+			block1->push(arch::uint_t(0x12345678));
+			block1->js(registers::cx, arch::uint_t(0x2000), arch::uint_t(0x3000));
 		}		
-		auto block2 = block1->fork(0x2000ull);
+		auto block2 = block1->fork(arch::uint_t(0x2000));
 		{			
-			block2->jmp(0x4000ull);
-			block2->fork(0x4000ull);
+			block2->jmp(arch::uint_t(0x4000));
+			block2->fork(arch::uint_t(0x4000));
 		}
-		auto block3 = block1->fork(0x3000ull);
+		auto block3 = block1->fork(arch::uint_t(0x3000));
 		{			
-			block3->jmp(0x4000ull);
-			block3->fork(0x4000ull);
+			block3->jmp(arch::uint_t(0x4000));
+			block3->fork(arch::uint_t(0x4000));
 		}
-		auto block4 = block1->owner->get_block(0x4000ull);
+		auto block4 = block1->owner->get_block(arch::uint_t(0x4000));
 		{			
 			block4->pop(registers::ax);
-			block4->vexit(0ull);
+			block4->vexit(arch::uint_t(0));
 		}
 
 		vtil::logger::log("Before:\n");
@@ -646,19 +648,19 @@ DOCTEST_TEST_CASE("Optimization branch_correction_pass")
 
 	{
 		block1->mov(reg_flags.select(1, 0), 0x0);
-		block1->js(reg_flags.select(1, 0), (uintptr_t)0x2000, (uintptr_t)0x3000);
+		block1->js(reg_flags.select(1, 0), arch::uint_t(0x2000), arch::uint_t(0x3000));
 	}
 
 	auto block2 = block1->fork(0x2000);
 	{		
 		block2->push(reg_flags); //dummy pin
-		block2->vexit(0ull);	 // marks the end
+		block2->vexit(arch::uint_t(0));	 // marks the end
 	}
 
 	auto block3 = block1->fork(0x3000);
 	{		
 		block3->push(reg_flags); //dummy pin
-		block3->vexit(0ull);	 // marks the end
+		block3->vexit(arch::uint_t(0));	 // marks the end
 	}
 
 	vtil::logger::log(":: Before:\n");

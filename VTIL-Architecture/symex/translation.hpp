@@ -112,7 +112,7 @@ namespace vtil
 					{
 						// Try to extract the offset from the compound expression.
 						//
-						intptr_t offset = 0;
+						arch::int_t offset = 0;
 						auto mem_base = symbolic::variable::pack_all( var.mem().decay() ).simplify( true );
 						if ( !mem_base->is_constant() )
 						{
@@ -122,12 +122,12 @@ namespace vtil
 							if ( fast_match( &results, A + U, mem_base ) )
 							{
 								mem_base = results.front().translate( A );
-								offset = *results.front().translate( U )->get<intptr_t>();
+								offset = *results.front().translate( U )->get<arch::int_t>();
 							}
 							else if ( fast_match( &results, A - U, mem_base ) )
 							{
 								mem_base = results.front().translate( A );
-								offset = -*results.front().translate( U )->get<intptr_t>();
+								offset = -*results.front().translate( U )->get<arch::int_t>();
 							}
 						}
 
